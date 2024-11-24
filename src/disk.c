@@ -96,18 +96,9 @@ void save_to_file(Disk* d, const char* file_name) {
     }
 
     printf("Successfully allocated %s\n", file_name);
-
-    // Write the Disk structure at the start of the file
-    fseek(file, 0, SEEK_SET); // Move to the start of the file
-    if (fwrite(d, sizeof(Disk), 1, file) != 1) {
-        printf("Error: Failed to write Disk structure to file.\n");
-        fclose(file);
-        free(d);
-        return;
-    }
-
     fclose(file);
-    printf("Disk structure written to %s\n", file_name);
+
+    write_disk(file_name, d);
 }
 
 Disk* initialize_disk_ffile(const char* _config_file, const char* image_file) {
@@ -176,11 +167,33 @@ void print_disk_info(const Disk* d) {
     printf("------------------\n");
 }
 
-void read_disk(Disk *disk,
-               uint32_t sector); // Will read the disk(boot_sector)
+void read_disk(const char* image_file, Disk* d) {
+  FILE* file = fopen("image_file", "r");
+  if (file == NULL) {
+    printf("Unable to read the file");
+  }
 
-void write_disk(Disk *disk,
-                uint32_t sector); // Will write to disk if found any modification to root_dir_cluster
+  fread(d, sizeof(Disk), 1, file);
 
-void free_disk(Disk *disk);  // clear disk struct
+  return;
+
+}
+void write_disk(const char* image_file, Disk *d) {
+    FILE* file = fopen(image_file, "w");
+
+    fseek(file, 0, SEEK_SET); // Move to the start of the file
+    if (fwrite(d, sizeof(Disk), 1, file) != 1) {
+        printf("Error: Failed to write Disk structure to file.\n");
+        fclose(file);
+        free(d);
+        return;
+    }
+
+    fclose(file);
+    printf("Disk structure written to %s\n", image_file);
+}
+void free_disk(Disk *disk) {
+  free(disk);
+  return;
+}
 

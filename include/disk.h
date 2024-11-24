@@ -40,11 +40,9 @@ Disk* initialize_disk(uint32_t _disk_size,
 
 Disk *initialize_disk_ffile(const char*  config_file, const char* image_file); // initialize_disk using config file
 
-void read_disk(Disk *disk,
-               uint32_t sector); // Will read the disk(boot_sector)
+void read_disk(const char* image_file, Disk *disk); // Will read the disk(boot_sector)
 
-void write_disk(Disk *disk,
-                uint32_t sector); // Will write to disk if found any modification to root_dir_cluster
+void write_disk(const char* image_file, Disk *disk); // Will read the disk(boot_sector)
 
 void free_disk(Disk *disk);  // clear disk struct
 
