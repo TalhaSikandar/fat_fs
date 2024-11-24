@@ -8,7 +8,6 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "../include/fat_fs.h"
 
 #define FILE_NAME_LENGTH 64
 #define FILE_EXTENSION_LENGTH 3
@@ -72,11 +71,11 @@ typedef struct {
     char ext[FILE_EXTENSION_LENGTH];   // 3-byte file extension
     uint32_t file_size;  // Size of the file in bytes
     uint32_t first_cluster;  // First cluster of the file's data
-} DirectoryEntry;
+} DirectoryEntry; // 76 bytes padding for ext +3 added
 
-
-DirectoryEntry *create_file(FileSystem *fs, const char *filename, uint32_t size);
-void delete_file(FileSystem *fs, DirectoryEntry *entry);
-void list_files(FileSystem *fs);
+// typedef struct FileSystem;
+DirectoryEntry *create_file(const char *filename, uint32_t size);
+void delete_file(DirectoryEntry *entry);
+void list_files();
 
 #endif // DIRECTORY_H

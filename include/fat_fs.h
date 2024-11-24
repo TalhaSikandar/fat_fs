@@ -8,8 +8,8 @@
 
 #include "../include/disk.h"
 #include "../include/fat_table.h"
-#include "../include/directory.h"
 #include "../include/utils.h"
+#include "../include/directory.h"
 
 // Structure definitions
 typedef struct {

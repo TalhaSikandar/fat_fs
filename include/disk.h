@@ -28,15 +28,18 @@ typedef struct {
     uint32_t clusters_per_file;
     uint64_t data_index;
     bool  isBootable;
-} Disk;
+} Disk; //48 Bytes isBootable padded with 7 Bytes
 
 
-Disk *initialize_disk(uint32_t _disk_size, 
+Disk* initialize_disk(uint32_t _disk_size, 
                       uint32_t _sector_size,
                       uint32_t _sectors_per_cluster, 
-                      uint8_t  _isBootable); // initialize_disk using parameters
+                      bool _isBootable,
+                      uint32_t _root_directory_clusters, 
+                      uint32_t _clusters_per_file,
+                      const char* image_file);
 
-Disk *initialize_disk(FILE* config_file); // initialize_disk using config file
+Disk *initialize_disk_ffile(const char*  config_file, const char* image_file); // initialize_disk using config file
 
 void read_disk(Disk *disk,
                uint32_t sector); // Will read the disk(boot_sector)
@@ -45,5 +48,7 @@ void write_disk(Disk *disk,
                 uint32_t sector); // Will write to disk if found any modification to root_dir_cluster
 
 void free_disk(Disk *disk);  // clear disk struct
+
+void save_to_file(Disk*, const char* file_name);
 
 #endif // DISK_H

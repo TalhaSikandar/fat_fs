@@ -4,11 +4,6 @@
 #include <stdint.h>
 #include "../include/disk.h"
 
-typedef struct {
-    uint32_t *entries;  // FAT entries (one per cluster)
-    uint32_t total_entries;  // total number of entries (clusters)
-} FAT;
-
 /*
 * attributes: 0 0 0 0 0 0 0 0
   *                         | isReserved
@@ -35,7 +30,12 @@ typedef struct {
 typedef struct {
     uint32_t next_cluster; 
     uint8_t attributes;  // total number of entries (clusters)
-} FATEntry;
+} FATEntry; //attributes padded with 1 3 bytes making = 8 bytes
+
+typedef struct {
+    FATEntry *entries;  // FAT entries (one per cluster)
+    uint32_t total_entries;  // total number of entries (clusters)
+} FAT;
 
 FAT *initialize_fat(Disk *disk, uint32_t num_clusters);
 void update_fat(FAT *fat, uint32_t cluster, uint32_t next_cluster);

@@ -1,9 +1,8 @@
-
 CC = gcc
 CFLAGS = -Wall -g
-SRC = src/fat_fs.c src/disk.c src/fat_table.c src/directory.c src/utils.c
+SRC = src/fat_fs.c src/disk.c src/fat_table.c src/directory.c src/utils.c src/main.c
 OBJ = $(SRC:.c=.o)
-EXEC = fat_fs
+EXEC = main
 
 all: $(EXEC)
 
