@@ -30,7 +30,6 @@ typedef struct {
     bool  isBootable;
 } Disk; //48 Bytes isBootable padded with 7 Bytes
 
-
 Disk* initialize_disk(uint32_t _disk_size, 
                       uint32_t _sector_size,
                       uint32_t _sectors_per_cluster, 
@@ -50,5 +49,7 @@ void write_disk(Disk *disk,
 void free_disk(Disk *disk);  // clear disk struct
 
 void save_to_file(Disk*, const char* file_name);
+
+void print_disk_info(const Disk* d);
 
 #endif // DISK_H

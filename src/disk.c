@@ -152,9 +152,28 @@ Disk* initialize_disk_ffile(const char* _config_file, const char* image_file) {
     }
 
 
-    // Call the previously defined function to initialize the disk
     return initialize_disk(disk_size, sector_size, sectors_per_cluster, isBootable, 
                            root_directory_clusters, clusters_per_file, image_file);
+}
+void print_disk_info(const Disk* d) {
+    if (d == NULL) {
+        printf("Error: Disk structure is NULL.\n");
+        return;
+    }
+
+    printf("Disk Information:\n");
+    printf("------------------\n");
+    printf("Sector Size: %u bytes\n", d->sector_size);
+    printf("Total Sectors: %u\n", d->total_sectors);
+    printf("Sectors Per Cluster: %u\n", d->sectors_per_cluster);
+    printf("Cluster Size: %u bytes\n", d->cluster_size);
+    printf("Number of FAT Entries: %u\n", d->num_fat_entries);
+    printf("Disk Size: %u bytes\n", d->disk_size);
+    printf("Reserved Clusters for Root Directory: %u\n", d->reserved_clusters_root_dir);
+    printf("Clusters Per File: %u\n", d->clusters_per_file);
+    printf("Data Index: %llu bytes\n", (unsigned long long)d->data_index);
+    printf("Bootable: %s\n", d->isBootable ? "Yes" : "No");
+    printf("------------------\n");
 }
 
 void read_disk(Disk *disk,

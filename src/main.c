@@ -13,5 +13,9 @@
 
 int main() {
   // Disk* d = initialize_disk_ffile("fs1.config", "fs1.img");
+  Disk* d = (Disk*) malloc(sizeof(Disk));
+  FILE* f = fopen("fs1.img", "r");
+  fread(d, sizeof(Disk), 1, f);
+  print_disk_info(d);
   return 0;
 }
