@@ -20,7 +20,7 @@
   *                             | isReadOnly
   *                             0 0 0 0 ( First 4 Bits - left)
   *                                   | isFreeToWriteANewEntry
-  *                                 | NotinUse
+  *                                 | isEncrypted
   *                               | NotinUse
   *                             | NotinUse
 */
@@ -31,7 +31,7 @@
 #define ATTRIBUTE_IS_SYSTEMFILE    (1 << 2)  // 0x04
 #define ATTRIBUTE_IS_READONLY      (1 << 3)  // 0x08
 #define ATTRIBUTE_FREE_TO_WRITE    (1 << 4)  // 0x01
-#define ATTRIBUTE_NOTINUSE1        (1 << 5)  // 0x20
+#define ATTRIBUTE_IS_ENCRYPTED        (1 << 5)  // 0x20
 #define ATTRIBUTE_NOTINUSE2        (1 << 6)  // 0x40
 #define ATTRIBUTE_NOTINUSE3        (1 << 7)  // 0x80
 
@@ -41,7 +41,7 @@
 #define IS_SYSTEMFILE(attributes)   ((attributes) & ATTRIBUTE_IS_SYSTEMFILE)
 #define IS_DIRECTORY(attributes)    ((attributes) & ATTRIBUTE_IS_DIRECTORY)
 #define IS_FREE_TO_WRITE(attributes)((attributes) & ATTRIBUTE_FREE_TO_WRITE)
-#define IS_NOTINUSE1(attributes)    ((attributes) & ATTRIBUTE_NOTINUSE1)
+#define IS_ENCRYPTED(attributes)    ((attributes) & ATTRIBUTE_IS_ENCRYPTED)
 #define IS_NOTINUSE2(attributes)    ((attributes) & ATTRIBUTE_NOTINUSE2)
 #define IS_NOTINUSE3(attributes)    ((attributes) & ATTRIBUTE_NOTINUSE3)
 
@@ -51,7 +51,7 @@
 #define SET_SYSTEMFILE(attributes)   ((attributes) |= ATTRIBUTE_IS_SYSTEMFILE)
 #define SET_DIRECTORY(attributes)    ((attributes) |= ATTRIBUTE_IS_DIRECTORY)
 #define SET_FREE_TO_WRITE(attributes)((attributes) |= ATTRIBUTE_FREE_TO_WRITE)
-#define SET_NOTINUSE1(attributes)    ((attributes) |= ATTRIBUTE_NOTINUSE1)
+#define SET_ENCRYPTED(attributes)    ((attributes) |= ATTRIBUTE_IS_ENCRYPTED)
 #define SET_NOTINUSE2(attributes)    ((attributes) |= ATTRIBUTE_NOTINUSE2)
 #define SET_NOTINUSE3(attributes)    ((attributes) |= ATTRIBUTE_NOTINUSE3)
 
@@ -61,7 +61,7 @@
 #define CLEAR_SYSTEMFILE(attributes)   ((attributes) &= ~ATTRIBUTE_IS_SYSTEMFILE)
 #define CLEAR_DIRECTORY(attributes)    ((attributes) &= ~ATTRIBUTE_IS_DIRECTORY)
 #define CLEAR_FREE_TO_WRITE(attributes)((attributes) &= ~ATTRIBUTE_FREE_TO_WRITE)
-#define CLEAR_NOTINUSE1(attributes)    ((attributes) &= ~ATTRIBUTE_NOTINUSE1)
+#define CLEAR_ENCRYPTED(attributes)    ((attributes) &= ~ATTRIBUTE_IS_ENCRYPTED)
 #define CLEAR_NOTINUSE2(attributes)    ((attributes) &= ~ATTRIBUTE_NOTINUSE2)
 #define CLEAR_NOTINUSE3(attributes)    ((attributes) &= ~ATTRIBUTE_NOTINUSE3)
 
@@ -73,7 +73,6 @@ typedef struct {
     uint32_t first_cluster;  // First cluster of the file's data
 } DirectoryEntry; // 76 bytes padding for ext +3 added
 
-// typedef struct FileSystem;
 DirectoryEntry *create_file(const char *filename, uint32_t size);
 void delete_file(DirectoryEntry *entry);
 void list_files();

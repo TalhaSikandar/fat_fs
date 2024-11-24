@@ -29,7 +29,7 @@
 
 typedef struct {
     uint32_t next_cluster; 
-    uint8_t attributes;  // total number of entries (clusters)
+    uint8_t attributes;  // free/file_system...
 } FATEntry; //attributes padded with 1 3 bytes making = 8 bytes
 
 typedef struct {
@@ -37,7 +37,7 @@ typedef struct {
     uint32_t total_entries;  // total number of entries (clusters)
 } FAT;
 
-FAT *initialize_fat(Disk *disk, uint32_t num_clusters);
+FAT *read_fat(Disk *disk, const char* image_file);
 void update_fat(FAT *fat, uint32_t cluster, uint32_t next_cluster);
 uint32_t allocate_cluster(FAT *fat);
 void deallocate_cluster(FAT *fat, uint32_t cluster);
