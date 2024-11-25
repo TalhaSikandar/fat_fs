@@ -10,7 +10,7 @@
 #include <stdlib.h>
 
 #define FILE_NAME_LENGTH 64
-#define FILE_EXTENSION_LENGTH 3
+#define FILE_EXTENSION_LENGTH 4
 
 /*
   * Attributes: 8-bits (1 Byte) 0 0 0 0 ( Last 4 Bits - right)
@@ -31,7 +31,7 @@
 #define ATTRIBUTE_IS_SYSTEMFILE    (1 << 2)  // 0x04
 #define ATTRIBUTE_IS_READONLY      (1 << 3)  // 0x08
 #define ATTRIBUTE_FREE_TO_WRITE    (1 << 4)  // 0x01
-#define ATTRIBUTE_IS_ENCRYPTED        (1 << 5)  // 0x20
+#define ATTRIBUTE_IS_ENCRYPTED     (1 << 5)  // 0x20
 #define ATTRIBUTE_NOTINUSE2        (1 << 6)  // 0x40
 #define ATTRIBUTE_NOTINUSE3        (1 << 7)  // 0x80
 
@@ -71,6 +71,7 @@ typedef struct {
     char ext[FILE_EXTENSION_LENGTH];   // 3-byte file extension
     uint32_t file_size;  // Size of the file in bytes
     uint32_t first_cluster;  // First cluster of the file's data
+    uint64_t parent_index;
 } DirectoryEntry; // 76 bytes padding for ext +3 added
 
 DirectoryEntry *create_file(const char *filename, uint32_t size);
