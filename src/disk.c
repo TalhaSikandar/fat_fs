@@ -53,8 +53,8 @@ Disk* initialize_disk(uint32_t _disk_size,
   d->total_files = max_files;
 
   printf("Reserved clusters for root directory: %u\n", d->reserved_clusters_root_dir);
-  printf("Total cluster size for root directory: %llu bytes\n", total_cluster_size);
-  printf("Maximum files that can be stored: %llu\n", max_files);
+  printf("Total cluster size for root directory: %llu bytes\n", (unsigned long long)total_cluster_size);
+  printf("Maximum files that can be stored: %llu\n", (unsigned long long)max_files);
 
   // calculate the number of FAT entries
   d->num_fat_entries = max_files * d->clusters_per_file;
@@ -89,7 +89,7 @@ Disk* initialize_disk(uint32_t _disk_size,
 }
 
 void save_to_file(Disk* d, const char* file_name) {
-    FILE* file = fopen(file_name, "wb");
+    FILE* file = fopen(file_name, "wb+");
     if (file == NULL) {
         printf("Error: Could not open file for writing.\n");
         free(d);
@@ -122,7 +122,7 @@ Disk* initialize_disk_ffile(const char* _config_file, const char* image_file) {
 
     uint32_t disk_size, sector_size, sectors_per_cluster, root_directory_clusters, clusters_per_file;
     bool isBootable;
-    char file_name[256];
+    // char file_name[256];
 
     if (fscanf(config_file, "disk_size = %u\n", &disk_size) != 1) {
         printf("Error: Failed to read disk_size from config file.\n");
@@ -158,7 +158,7 @@ Disk* initialize_disk_ffile(const char* _config_file, const char* image_file) {
     return initialize_disk(disk_size, sector_size, sectors_per_cluster, isBootable, 
                            root_directory_clusters, clusters_per_file, image_file);
 }
-void print_disk_info(const Disk* d) {
+void print_disk(const Disk* d) {
     if (d == NULL) {
         printf("Error: Disk structure is NULL.\n");
         return;
@@ -180,18 +180,20 @@ void print_disk_info(const Disk* d) {
     printf("------------------\n");
 }
 
-void read_disk(const char* image_file, Disk* d) {
-  FILE* file = fopen("image_file", "r");
+Disk* read_disk(const char* image_file) {
+  FILE* file = fopen(image_file, "r");
   if (file == NULL) {
-    printf("Unable to read the file");
+    printf("Unable to read the file\n");
+    return NULL;
   }
+  Disk* d = (Disk*) malloc(sizeof(Disk));
 
   fread(d, sizeof(Disk), 1, file);
 
-  return;
+  return d;
 }
 void write_disk(const char* image_file, Disk *d) {
-  FILE* file = fopen(image_file, "wb");
+  FILE* file = fopen(image_file, "rb+");
   if (file == NULL) {
       printf("Error: Could not open the file to write.\n");
       return;

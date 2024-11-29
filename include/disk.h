@@ -43,7 +43,7 @@ Disk* initialize_disk(uint32_t _disk_size,
 
 Disk *initialize_disk_ffile(const char*  config_file, const char* image_file); // initialize_disk using config file
 
-void read_disk(const char* image_file, Disk *disk); // Will read the disk(boot_sector)
+Disk *read_disk(const char* image_file); // Will read the disk(boot_sector)
 
 void write_disk(const char* image_file, Disk *disk); // Will read the disk(boot_sector)
 
@@ -51,6 +51,6 @@ void free_disk(Disk *disk);  // clear disk struct
 
 void save_to_file(Disk*, const char* file_name);
 
-void print_disk_info(const Disk* d);
+void print_disk(const Disk* d);
 
 #endif // DISK_H

@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS = -Wall -g
-SRC = src/fat_fs.c src/disk.c src/fat_table.c src/directory.c src/utils.c src/main.c
+SRC = src/min_heap.c src/fat_fs.c src/disk.c src/fat_table.c src/directory.c src/utils.c src/main.c
 OBJ = $(SRC:.c=.o)
 EXEC = main
 
