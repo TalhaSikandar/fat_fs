@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include "utils.h"
 
 /*
 * 2^32: 2GB
@@ -28,6 +29,8 @@ typedef struct {
     uint32_t clusters_per_file;
     uint64_t data_index;
     bool  isBootable;
+    uint64_t total_files;
+    uint32_t disk_used;  // total size of the disk in bytes
 } Disk; //48 Bytes isBootable padded with 7 Bytes
 
 Disk* initialize_disk(uint32_t _disk_size, 

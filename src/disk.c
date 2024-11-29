@@ -8,6 +8,8 @@
 #include <stdbool.h>
 #include <fcntl.h>   // For open, O_CREAT, O_WRONLY, etc.
 #include <unistd.h>  // For close
+#include <memory.h>
+
 
 Disk* initialize_disk(uint32_t _disk_size, 
                       uint32_t _sector_size,
@@ -16,64 +18,74 @@ Disk* initialize_disk(uint32_t _disk_size,
                       uint32_t _root_directory_clusters, 
                       uint32_t _clusters_per_file, 
                       const char* image_name) {
-    printf("Initialization started...\n");
+  printf("Initialization started...\n");
 
-    Disk* d = (Disk*) malloc(sizeof(Disk));
-    if (d == NULL) {
-        printf("Error: Memory allocation failed for Disk structure.\n");
-        return NULL;
-    }
+  Disk* d = (Disk*) malloc(sizeof(Disk));
+  if (d == NULL) {
+      printf("Error: Memory allocation failed for Disk structure.\n");
+      return NULL;
+  }
 
-    d->disk_size           = _disk_size;
-    d->sector_size         = _sector_size;
-    d->sectors_per_cluster = _sectors_per_cluster;
-    d->isBootable          = _isBootable;
-    d->clusters_per_file   = _clusters_per_file;
+  d->disk_size           = _disk_size;
+  d->sector_size         = _sector_size;
+  d->sectors_per_cluster = _sectors_per_cluster;
+  d->isBootable          = _isBootable;
+  d->clusters_per_file   = _clusters_per_file;
 
-    printf("Disk size: %u bytes\n", d->disk_size);
-    printf("Sector size: %u bytes\n", d->sector_size);
-    printf("Sectors per cluster: %u\n", d->sectors_per_cluster);
+  printf("Disk size: %u bytes\n", d->disk_size);
+  printf("Sector size: %u bytes\n", d->sector_size);
+  printf("Sectors per cluster: %u\n", d->sectors_per_cluster);
 
-    // calculate total sectors and cluster size
-    d->total_sectors       = d->disk_size / d->sector_size;
-    d->cluster_size        = d->sector_size * d->sectors_per_cluster;
+  // Calculating total sectors for disk struct
+  uint32_t disk_struct_sectors = calculate_required_sectors(sizeof(Disk), d->sector_size);
 
-    printf("Total sectors: %u\n", d->total_sectors);
-    printf("Cluster size: %u bytes\n", d->cluster_size);
+  // calculate total sectors and cluster size
+  d->total_sectors       = d->disk_size / d->sector_size;
+  d->cluster_size        = d->sector_size * d->sectors_per_cluster;
 
-    // calculate reserved clusters for root directory and maximum files
-    d->reserved_clusters_root_dir = _root_directory_clusters;
-    uint64_t total_cluster_size = d->reserved_clusters_root_dir * d->cluster_size;
-    uint64_t max_files = total_cluster_size / sizeof(DirectoryEntry);
+  printf("Total sectors: %u\n", d->total_sectors);
+  printf("Cluster size: %u bytes\n", d->cluster_size);
 
-    printf("Reserved clusters for root directory: %u\n", d->reserved_clusters_root_dir);
-    printf("Total cluster size for root directory: %llu bytes\n", total_cluster_size);
-    printf("Maximum files that can be stored: %llu\n", max_files);
+  // calculate reserved clusters for root directory and maximum files
+  d->reserved_clusters_root_dir = _root_directory_clusters;
+  uint64_t total_cluster_size = d->reserved_clusters_root_dir * d->cluster_size;
+  uint64_t max_files = total_cluster_size / sizeof(DirectoryEntry);
+  d->total_files = max_files;
 
-    // calculate the number of FAT entries
-    d->num_fat_entries = max_files * d->clusters_per_file;
-    d->num_fat_entries += d->reserved_clusters_root_dir;
+  printf("Reserved clusters for root directory: %u\n", d->reserved_clusters_root_dir);
+  printf("Total cluster size for root directory: %llu bytes\n", total_cluster_size);
+  printf("Maximum files that can be stored: %llu\n", max_files);
 
-    printf("Number of FAT entries: %u\n", d->num_fat_entries);
+  // calculate the number of FAT entries
+  d->num_fat_entries = max_files * d->clusters_per_file;
+  d->num_fat_entries += d->reserved_clusters_root_dir;
 
-    // calculate the total FAT table size
-    uint64_t total_fat_table_size = sizeof(FATEntry) * d->num_fat_entries;
-    d->data_index = total_fat_table_size + sizeof(Disk);
+  printf("Number of FAT entries: %u\n", d->num_fat_entries);
 
-    printf("Total FAT table size: %llu bytes\n", total_fat_table_size);
-    printf("Data index (start of actual data): %llu bytes\n", d->data_index);
+  // calculate the total FAT table size
+  uint64_t total_fat_table_size = sizeof(FATEntry) * d->num_fat_entries;
+  uint32_t fat_table_sectors = calculate_required_sectors(total_fat_table_size, d->sector_size);
+  // d->data_index = total_fat_table_size + sizeof(Disk);
+  // to read and write in sector_size or chunks
+  d->data_index = (fat_table_sectors * d->sector_size)+ (d->sector_size * disk_struct_sectors);
 
-    // check if the total size of FAT table, root directory, and data exceeds disk size
-    uint64_t total_used_size = total_fat_table_size + sizeof(Disk);
-    if (total_used_size > d->disk_size) {
-        printf("Error: The total disk size exceeds the allocated disk size.\n");
-        free(d); 
-        return NULL;
-    }
-    
-    save_to_file(d, image_name);
-    printf("Initialization complete.\n");
-    return d;
+  printf("Total FAT table size: %llu bytes\n", (unsigned long long)total_fat_table_size);
+  printf("Data index (start of actual data): %llu bytes\n", (unsigned long long)d->data_index);
+
+  // check if the total size of FAT table, root directory, and data exceeds disk size
+  uint64_t total_used_size = (fat_table_sectors * d->sector_size) + (d->sector_size) * disk_struct_sectors;
+  if (total_used_size > d->disk_size) {
+      printf("Error: The total disk size exceeds the allocated disk size.\n");
+      free(d); 
+      return NULL;
+  }
+
+  d->disk_used = total_used_size;
+  printf("Total used disk is: %u bytes\n", d->disk_used);
+  
+  save_to_file(d, image_name);
+  printf("Initialization complete.\n");
+  return d;
 }
 
 void save_to_file(Disk* d, const char* file_name) {
@@ -84,7 +96,7 @@ void save_to_file(Disk* d, const char* file_name) {
         return;
     }
 
-    // Allocate the disk image by writing zeros
+  // Change this afterwards, is like this due to some error.
     uint8_t zero = 0;
     for (uint64_t i = 0; i < d->disk_size; ++i) {
         if (fwrite(&zero, sizeof(uint8_t), 1, file) != 1) {
@@ -164,6 +176,7 @@ void print_disk_info(const Disk* d) {
     printf("Clusters Per File: %u\n", d->clusters_per_file);
     printf("Data Index: %llu bytes\n", (unsigned long long)d->data_index);
     printf("Bootable: %s\n", d->isBootable ? "Yes" : "No");
+    printf("Max Files: %llu files\n", (unsigned long long)d->total_files);
     printf("------------------\n");
 }
 
@@ -176,21 +189,38 @@ void read_disk(const char* image_file, Disk* d) {
   fread(d, sizeof(Disk), 1, file);
 
   return;
-
 }
 void write_disk(const char* image_file, Disk *d) {
-    FILE* file = fopen(image_file, "w");
+  FILE* file = fopen(image_file, "wb");
+  if (file == NULL) {
+      printf("Error: Could not open the file to write.\n");
+      return;
+  }
 
-    fseek(file, 0, SEEK_SET); // Move to the start of the file
-    if (fwrite(d, sizeof(Disk), 1, file) != 1) {
-        printf("Error: Failed to write Disk structure to file.\n");
-        fclose(file);
-        free(d);
-        return;
-    }
+  uint32_t required_sectors = calculate_required_sectors(sizeof(Disk), d->sector_size);
+  uint32_t buffer_size = required_sectors * d->sector_size;
 
-    fclose(file);
-    printf("Disk structure written to %s\n", image_file);
+  uint8_t* buffer = (uint8_t*) malloc(buffer_size);
+  if (buffer == NULL) {
+      printf("Error: Could not allocate buffer.\n");
+      fclose(file);
+      return;
+  }
+
+  memset(buffer, 0, buffer_size);
+  memcpy(buffer, d, sizeof(Disk));
+
+  fseek(file, 0, SEEK_SET); // Move to the start of the file
+  if (fwrite(buffer, buffer_size, 1, file) != 1) {
+      printf("Error: Failed to write Disk structure (in sector form) to file.\n");
+      fclose(file);
+      free(buffer);
+      return;
+  }
+
+  fclose(file);
+  free(buffer);
+  printf("Disk structure written to %s in %u sectors.\n", image_file, required_sectors);
 }
 void free_disk(Disk *disk) {
   free(disk);

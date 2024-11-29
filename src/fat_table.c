@@ -12,7 +12,7 @@ FAT *read_fat(Disk *disk, const char* image_file) {
   fat->total_entries = disk->num_fat_entries;
   fat->entries = (FATEntry*) malloc(sizeof(FATEntry) * fat->total_entries);
 
-  FILE* file = fopen(image_file, "r");
+  FILE* file = fopen(image_file, "rb");
   if (file == NULL) {
     printf("Could not read the file for FAT entries\n");
   }
