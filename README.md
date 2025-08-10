@@ -1,4 +1,4 @@
-### AS-FS
+### FAT-FS
 ## install
 `make`
 ## run
